@@ -1,21 +1,56 @@
-import React from "react"
-import { Link } from "gatsby"
+import React, { useEffect, useRef, useState } from "react"
+import TwilioVideo from "twilio-video"
 
 import Layout from "../components/layout"
-import Image from "../components/image"
 import SEO from "../components/seo"
+import StartForm from "../components/start-form"
 
-const IndexPage = () => (
-  <Layout>
-    <SEO title="Home" />
-    <h1>Hi people</h1>
-    <p>Welcome to your new Gatsby site.</p>
-    <p>Now go build something great.</p>
-    <div style={{ maxWidth: `300px`, marginBottom: `1.45rem` }}>
-      <Image />
+const Video = ({ token }) => {
+  const localVidRef = useRef()
+  const remoteVidRef = useRef()
+
+  useEffect(() => {
+    TwilioVideo.connect(token, { video: true, audio: true, name: "test" }).then(
+      room => {
+        // Attach the local video
+        TwilioVideo.createLocalVideoTrack().then(track => {
+          localVidRef.current.appendChild(track.attach())
+        })
+
+        // Attach video for all remote participants
+        room.participants.forEach(participant => {
+          participant.tracks.forEach(publication => {
+            if (publication.isSubscribed) {
+              const track = publication.track
+
+              remoteVidRef.current.appendChild(track.attach())
+            }
+          })
+        })
+      }
+    )
+  }, [token])
+
+  return (
+    <div>
+      <div ref={localVidRef} />
+      <div ref={remoteVidRef} />
     </div>
-    <Link to="/page-2/">Go to page 2</Link>
-  </Layout>
-)
+  )
+}
+
+const IndexPage = () => {
+  const [token, setToken] = useState(false)
+  return (
+    <Layout>
+      <SEO title="Home" />
+      {!token ? <StartForm storeToken={setToken} /> : <Video token={token} />}
+      <p>
+        TODO: 1. Show local video 2. Connect to a room 3. Show participants’
+        video (remote) 4. Handle events
+      </p>
+    </Layout>
+  )
+}
 
 export default IndexPage
