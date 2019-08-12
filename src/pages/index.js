@@ -19,13 +19,13 @@ const Video = ({ token }) => {
 
         const addParticipant = participant => {
           console.log("new participant!")
-          console.log(participant.identity)
+          console.log(participant)
           participant.tracks.forEach(publication => {
-            if (publication.isSubscribed) {
-              const track = publication.track
+            // if (publication.isSubscribed) {
+            const track = publication.track
 
-              remoteVidRef.current.appendChild(track.attach())
-            }
+            remoteVidRef.current.appendChild(track.attach())
+            // }
           })
         }
 
