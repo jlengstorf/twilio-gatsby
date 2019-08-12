@@ -17,8 +17,9 @@ const Video = ({ token }) => {
           localVidRef.current.appendChild(track.attach())
         })
 
-        // Attach video for all remote participants
-        room.participants.forEach(participant => {
+        const addParticipant = participant => {
+          console.log("new participant!")
+          console.log(participant.identity)
           participant.tracks.forEach(publication => {
             if (publication.isSubscribed) {
               const track = publication.track
@@ -26,7 +27,10 @@ const Video = ({ token }) => {
               remoteVidRef.current.appendChild(track.attach())
             }
           })
-        })
+        }
+
+        room.participants.forEach(addParticipant)
+        room.on("participantConnected", addParticipant)
       }
     )
   }, [token])
